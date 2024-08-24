@@ -115,6 +115,7 @@ glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
 int modelSelected = 0;
 bool enableCountSelected = true;
+float avance = 0.01, giroEclipse = 0.1;
 
 // Variables to animations keyframes
 bool saveFrame = false, availableSave = true;
@@ -996,6 +997,67 @@ void applicationLoop() {
 
 		// Constantes de animaciones
 		rotHelHelY += 0.5;
+
+		//Maquina de estados para el eclipse
+		switch (state) {
+			case 0:
+				if(numberAdvance ==0){
+					maxAdvance = 64.0;
+				}else if(numberAdvance == 1){
+					maxAdvance = 50.0;
+				}else if(numberAdvance == 2){
+					maxAdvance = 47.0;
+				}else if(numberAdvance == 3){
+					maxAdvance = 50.0;
+				}else if(numberAdvance == 4){
+					maxAdvance = 45.0;
+				}
+				break;
+			case 1:
+				modelMatrixEclipse = glm::translate(modelMatrixEclipse, glm::vec3(0.0, 0.0, avance));
+				advanceCount += avance;
+				rotWheelsX +=0.05;
+				rotWheelsY-=0.02;
+				if(rotWheelsY<=0){
+					rotWheelsY = 0;
+				}
+				if(advanceCount>maxAdvance){
+					advanceCount = 0;
+					state = 2;
+					numberAdvance++;
+				}
+				break;
+			case 2:
+				modelMatrixEclipse = glm::translate(modelMatrixEclipse, glm::vec3(0.0, 0.0,0.25));
+				modelMatrixEclipse = glm::rotate(modelMatrixEclipse, glm::radians(giroEclipse), glm::vec3(0, 1, 0));
+				rotCount += giroEclipse;
+				rotWheelsY += 0.02;
+				if(rotWheelsY>= 0.25){
+					rotWheelsY = 0.25;
+				}
+				if (rotCount > 90.0) {
+					rotCount = 0;
+					state = 0;
+					if(numberAdvance == 4)
+						numberAdvance = 1;
+				}
+				break;
+		}
+		// Maquina de estados de la puerta del lambo
+		switch(stateDoor){
+			case 0:
+				dorRotCount += 0.5;
+				if(dorRotCount > 75){
+					stateDoor = 1;
+				}
+				break;
+			case 1:
+				dorRotCount -= 0.5;
+				if(dorRotCount < 0){
+					stateDoor = 0;
+				}
+				break;
+		}
 
 		glfwSwapBuffers(window);
 	}
